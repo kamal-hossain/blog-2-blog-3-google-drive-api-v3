@@ -115,6 +115,67 @@ app.post('/uploadAFile', (req, res) => {
   );
 });
 
+// Route for downloading an image/file
+app.get('/downloadAFile', (req, res) => {
+  var dir = `./downloads`; // directory from where node.js will look for downloaded file from google drive
+
+  var fileId = '13_Iq3ImCLQqBStDQ9ottLIJwxwlXkQpa'; // Desired file id to download from  google drive
+
+  var dest = fs.createWriteStream('./downloads/kamal-hossain.jpg'); // file path where google drive function will save the file
+
+  const drive = google.drive({ version: 'v3', auth }); // Authenticating drive API
+
+  let progress = 0; // This will contain the download progress amount
+
+  // Uploading Single image to drive
+  drive.files
+    .get({ fileId, alt: 'media' }, { responseType: 'stream' })
+    .then((driveResponse) => {
+      driveResponse.data
+        .on('end', () => {
+          console.log('\nDone downloading file.');
+          const file = `${dir}/kamal-hossain.jpg`; // file path from where node.js will send file to the requested user
+          res.download(file); // Set disposition and send it.
+        })
+        .on('error', (err) => {
+          console.error('Error downloading file.');
+        })
+        .on('data', (d) => {
+          progress += d.length;
+          if (process.stdout.isTTY) {
+            process.stdout.clearLine();
+            process.stdout.cursorTo(0);
+            process.stdout.write(`Downloaded ${progress} bytes`);
+          }
+        })
+        .pipe(dest);
+    })
+    .catch((err) => console.log(err));
+});
+
+// Route for downloading an image/file
+app.delete('/deleteAFile', (req, res) => {
+  var fileId = '1vuZs3N8qnevNEETCKnZQ5js0HOCpGTxs'; // Desired file id to download from  google drive
+
+  const drive = google.drive({ version: 'v3', auth }); // Authenticating drive API
+
+  // Deleting the image from Drive
+  drive.files
+    .delete({
+      fileId: fileId,
+    })
+    .then(
+      async function (response) {
+        res.status(204).json({ status: 'success' });
+      },
+      function (err) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'Deletion Failed for some reason' }] });
+      }
+    );
+});
+
 app.listen(PORT, () => {
   console.log(`Node.js App running on port ${PORT}...`);
 });
