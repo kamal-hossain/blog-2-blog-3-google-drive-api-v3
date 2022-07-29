@@ -1,4 +1,4 @@
-### Read the blog at: https://kamalhossain.me/blog/google-drive-api-usage-in-nodejs 
+### Read the blog at: https://devkamal.com/blog/google-drive-api-in-nodejs
 
 To run locally:
 
